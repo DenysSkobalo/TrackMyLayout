@@ -2,9 +2,13 @@ CC = clang
 CFLAGS = -Wall -Wextra -Iinclude -std=c17
 OBJCFLAGS = -Wall -Wextra -Iinclude -ObjC
 
-SRC_C = src/main.c
+SRC_C = src/main.c src/rules.c
 SRC_OBJC = src/macos_bridge.m
-OBJ = build/main.o build/macos_bridge.o
+
+OBJ_C = $(patsubst src/%.c, build/%.o, $(SRC_C))
+OBJ_OBJC = $(patsubst src/%.m, build/%.o, $(SRC_OBJC))
+OBJ = $(OBJ_C) $(OBJ_OBJC)
+
 TARGET = mis
 
 all: $(TARGET)

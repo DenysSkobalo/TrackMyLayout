@@ -1,0 +1,7 @@
+{
+  "rules": [
+    {"app": "kitty", "layout": "eng"},
+    {"app": "Telegram", "layout": "ua"},
+    {"app": "Google Chrome", "layout": "eng"}
+  ]
+}

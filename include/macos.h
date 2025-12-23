@@ -7,7 +7,7 @@ extern "C" {
 
 const char *get_active_window_title(void);
 
-// void switch_keyboard_layout(const char *layout_identifier);
+void switch_keyboard_layout(const char *layout_identifier);
 
 #ifdef __cplusplus
 }

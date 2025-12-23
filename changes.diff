@@ -1,0 +1,88 @@
+diff --git a/Makefile b/Makefile
+index a73d23c..b6e5cbf 100644
+--- a/Makefile
++++ b/Makefile
+@@ -2,9 +2,13 @@ CC = clang
+ CFLAGS = -Wall -Wextra -Iinclude -std=c17
+ OBJCFLAGS = -Wall -Wextra -Iinclude -ObjC
+ 
+-SRC_C = src/main.c
++SRC_C = src/main.c src/rules.c
+ SRC_OBJC = src/macos_bridge.m
+-OBJ = build/main.o build/macos_bridge.o
++
++OBJ_C = $(patsubst src/%.c, build/%.o, $(SRC_C))
++OBJ_OBJC = $(patsubst src/%.m, build/%.o, $(SRC_OBJC))
++OBJ = $(OBJ_C) $(OBJ_OBJC)
++
+ TARGET = mis
+ 
+ all: $(TARGET)
+diff --git a/build/main.o b/build/main.o
+index 082e106..329e1e0 100644
+Binary files a/build/main.o and b/build/main.o differ
+diff --git a/include/macos_bridge.h b/include/macos_bridge.h
+index 2150ba7..66d9a85 100644
+--- a/include/macos_bridge.h
++++ b/include/macos_bridge.h
+@@ -7,7 +7,7 @@ extern "C" {
+ 
+ const char *get_active_window_title(void);
+ 
+-void switch_keyboard_layout(const char *layout_identifier);
++// void switch_keyboard_layout(const char *layout_identifier);
+ 
+ #ifdef __cplusplus
+ }
+diff --git a/src/macos_bridge.m b/src/macos_bridge.m
+index 403f122..52ecaae 100644
+--- a/src/macos_bridge.m
++++ b/src/macos_bridge.m
+@@ -7,12 +7,13 @@
+     @autoreleasepool {
+         NSWorkspace *ws = [NSWorkspace sharedWorkspace];
+         NSArray *apps = [ws runningApplications];
++
+         for (NSRunningApplication *app in apps) {
+             if ([app isActive]) {
+                 NSString *title = [app localizedName];
+                 if (title) {
+                     char *c_title = strdup([title UTF8String]);
+-                    return c_title; 
++                   return c_title; 
+                 }
+             }
+         }
+diff --git a/src/main.c b/src/main.c
+index 3cb440a..6a80425 100644
+--- a/src/main.c
++++ b/src/main.c
+@@ -1,11 +1,23 @@
+-#include "macos_bridge.h"
+-
+-#include "macos_bridge.h"
++#include "rules.h"
+ #include <stdio.h>
+ 
+ int main(void) {
+-  const char *title = get_active_window_title();
+-  printf("Active window: %s\n", title);
++  const char *path_json = "./rules/rules.json";
++
++  RulesConfig *cfg = rules_load_from_file(path_json);
++  if (!cfg) {
++    fprintf(stderr, "Failed to read JSON file\n");
++    return 1;
++  }
++
++  printf("Number of rules: %zu\n", cfg->rule_count);
++
++  for (size_t i = 0; i < cfg->rule_count; i++) {
++    printf("Rule %zu:\n", i + 1);
++    printf("  AppName: %s\n", cfg->rules[i].AppName);
++    printf("  Layout : %s\n", cfg->rules[i].layout);
++  }
+ 
++  rules_free(cfg);
+   return 0;
+ }
