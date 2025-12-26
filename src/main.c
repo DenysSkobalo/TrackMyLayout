@@ -1,7 +1,8 @@
+#include "auto-detected-app.h"
 #include "rules.h"
 #include <stdio.h>
 
-int main(void) {
+int main() {
   const char *path_json = "./rules/rules.json";
 
   RulesConfig *cfg = rules_load_from_file(path_json);
@@ -19,5 +20,8 @@ int main(void) {
   }
 
   rules_free(cfg);
+
+  startApplicationActivityAgent();
+
   return 0;
 }

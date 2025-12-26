@@ -1,28 +1,59 @@
-CC = clang
-CFLAGS = -Wall -Wextra -Iinclude -std=c17
-OBJCFLAGS = -Wall -Wextra -Iinclude -ObjC
+APP_NAME      := MIS
+APP_BUNDLE    := $(APP_NAME).app
+APP_EXEC      := mis
 
-SRC_C = src/main.c src/rules.c
-SRC_OBJC = src/macos_bridge.m
+CC            := clang
+CFLAGS        := -Wall -Wextra -Iinclude
+OBJCFLAGS     := -Wall -Wextra -Iinclude -ObjC
+LDFLAGS       := -framework Cocoa
 
-OBJ_C = $(patsubst src/%.c, build/%.o, $(SRC_C))
-OBJ_OBJC = $(patsubst src/%.m, build/%.o, $(SRC_OBJC))
-OBJ = $(OBJ_C) $(OBJ_OBJC)
+SRC_DIR       := src
+BUILD_DIR     := build
 
-TARGET = mis
+SRC_C         := $(wildcard $(SRC_DIR)/*.c)
+SRC_OBJC      := $(wildcard $(SRC_DIR)/*.m)
 
-all: $(TARGET)
+OBJ_C         := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRC_C))
+OBJ_OBJC      := $(patsubst $(SRC_DIR)/%.m,$(BUILD_DIR)/%.o,$(SRC_OBJC))
 
-build/%.o: src/%.c
-	mkdir -p build
+OBJS          := $(OBJ_C) $(OBJ_OBJC)
+
+.PHONY: all clean mis agent run
+
+all: agent
+
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
+# ---------- Compile ----------
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-build/%.o: src/%.m
-	mkdir -p build
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.m | $(BUILD_DIR)
 	$(CC) $(OBJCFLAGS) -c $< -o $@
 
-$(TARGET): $(OBJ)
-	$(CC) $(OBJ) -o $(TARGET) -lobjc -framework Foundation -framework AppKit -framework Carbon
+# ---------- Link ----------
+mis: $(OBJS)
+	$(CC) $^ $(LDFLAGS) -o $(BUILD_DIR)/$(APP_EXEC)
 
+# ---------- macOS Utility Agent ----------
+agent: mis
+	rm -rf $(APP_BUNDLE)
+	mkdir -p $(APP_BUNDLE)/Contents/MacOS
+	mkdir -p $(APP_BUNDLE)/Contents
+
+	cp $(BUILD_DIR)/$(APP_EXEC) \
+	   $(APP_BUNDLE)/Contents/MacOS/$(APP_EXEC)
+
+	chmod +x $(APP_BUNDLE)/Contents/MacOS/$(APP_EXEC)
+
+	chmod +x ./generate_plist.sh
+	./generate_plist.sh $(APP_BUNDLE) $(APP_EXEC)
+
+# ---------- Run ----------
+run:
+	./$(APP_BUNDLE)/Contents/MacOS/$(APP_EXEC)
+
+# ---------- Clean ----------
 clean:
-	rm -rf build $(TARGET)
+	rm -rf $(BUILD_DIR) $(APP_BUNDLE)
