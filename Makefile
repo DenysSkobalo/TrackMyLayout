@@ -2,22 +2,21 @@ APP_NAME       := TrackMyLayoutCLI
 APP_EXECUTABLE := $(APP_NAME)
 
 CC             := clang
-CFLAGS         := -Wall -Wextra -O2 -ITrackMyLayoutApp/TrackMyLayoutApp/include
-OBJCFLAGS      := -Wall -Wextra -O2 -ObjC -ITrackMyLayoutApp/TrackMyLayoutApp/include
+CFLAGS         := -Wall -Wextra -O2 -ITrackMyLayoutApp/include
+OBJCFLAGS      := -Wall -Wextra -O2 -ObjC -ITrackMyLayoutApp/include
 LDFLAGS        := -framework Cocoa -framework IOKit -framework Carbon
 
+SRC_DIR        := TrackMyLayoutApp/src
 BUILD_DIR      := build
-SRC_DIR        := TrackMyLayoutApp/TrackMyLayoutApp/src
 
-C_SOURCES      := main.c \
-                $(wildcard $(SRC_DIR)/*.c)
+C_SOURCES      := main.c $(wildcard $(SRC_DIR)/*.c)
 OBJC_SOURCES   := $(wildcard $(SRC_DIR)/*.m)
 
 C_OBJS         := $(patsubst %.c,$(BUILD_DIR)/%.o,$(C_SOURCES))
 OBJC_OBJS      := $(patsubst %.m,$(BUILD_DIR)/%.o,$(OBJC_SOURCES))
 OBJECTS        := $(C_OBJS) $(OBJC_OBJS)
 
-DEPS := $(OBJECTS:.o=.d)
+DEPS           := $(OBJECTS:.o=.d)
 
 .PHONY: all clean run
 
