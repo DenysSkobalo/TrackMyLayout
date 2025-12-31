@@ -55,3 +55,27 @@ CMakeCache.txt
 # ------------------------
 *.sh~
 .cache/
+
+# ------------------------
+# Swift / Xcode build artifacts
+# ------------------------
+DerivedData/
+build/
+*.app
+*.ipa
+*.dSYM
+*.xcuserdatad
+*.xcscmblueprint
+
+# Swift Package Manager
+/.build/
+/Packages/
+Package.resolved
+
+# Swift Playgrounds
+Timeline.xctimeline
+playground.xcworkspace
+
+# SwiftUI previews
+*.preview-thumbnails
+*.previews
